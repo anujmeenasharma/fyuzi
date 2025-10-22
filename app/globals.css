@@ -770,3 +770,13 @@ body {
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* Cursor blinking animation for better performance */
+@keyframes cursorBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}

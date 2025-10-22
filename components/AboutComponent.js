@@ -34,64 +34,115 @@ export default function AboutComponent() {
         });
     };
 
-    // Mouse move parallax effect
+    // Mouse move parallax effect - Optimized
     useEffect(() => {
         if (!scopeRef.current) return;
         const ctx = gsap.context(() => {
             let rafId = null;
             let currentX = 0;
             let currentY = 0;
+            let isAnimating = false;
+            
+            // Cache DOM elements and dimensions
+            let cachedDims = null;
+            let cachedElements = null;
+            
+            const updateCache = () => {
+                if (!aboutCont.current) return;
+                cachedDims = aboutCont.current.getBoundingClientRect();
+                cachedElements = {
+                    img1: document.querySelector('.img1'),
+                    img2: document.querySelector('.img2'),
+                    img3: document.querySelector('.img3'),
+                    img4: document.querySelector('.img4'),
+                    img5: document.querySelector('.img5'),
+                    img7: document.querySelector('.img7'),
+                    img8: document.querySelector('.img8')
+                };
+            };
+            
+            updateCache();
+            
+            // Throttle mouse move events
+            let lastMoveTime = 0;
+            const throttleDelay = 16; // ~60fps
 
             const handleMouseMove = (e) => {
-                if (!aboutCont.current) return;
-                const dims = aboutCont.current.getBoundingClientRect();
+                const now = performance.now();
+                if (now - lastMoveTime < throttleDelay) return;
+                lastMoveTime = now;
+                
+                if (!cachedDims || !cachedElements) {
+                    updateCache();
+                    return;
+                }
+                
                 currentX = gsap.utils.clamp(
                     -1,
                     1,
-                    ((e.clientX - dims.left) / dims.width) * 2 - 1
+                    ((e.clientX - cachedDims.left) / cachedDims.width) * 2 - 1
                 );
                 currentY = gsap.utils.clamp(
                     -1,
                     1,
-                    ((e.clientY - dims.top) / dims.height) * 2 - 1
+                    ((e.clientY - cachedDims.top) / cachedDims.height) * 2 - 1
                 );
 
-                // Cancel previous frame if it hasn't run yet
-                if (rafId) return;
+                if (rafId || isAnimating) return;
+                isAnimating = true;
 
                 rafId = requestAnimationFrame(() => {
+                    if (step3Reached.current) {
+                        rafId = null;
+                        isAnimating = false;
+                        return;
+                    }
+                    
                     const moveAmount = 40;
                     const moveAmountY = 30;
+                    
+                    // Use transform3d for better performance
                     const imgConfigs = [
-                        { selector: ".img1", factor: 1.5 },
-                        { selector: ".img2", factor: 1 },
-                        { selector: ".img3", factor: 0.6 },
-                        { selector: ".img4", factor: 0.2 },
-                        { selector: ".img5", factor: -0.8 },
-                        { selector: ".img7", factor: -1.7 },
-                        { selector: ".img8", factor: 0.5 },
+                        { element: cachedElements.img1, factor: 1.5 },
+                        { element: cachedElements.img2, factor: 1 },
+                        { element: cachedElements.img3, factor: 0.6 },
+                        { element: cachedElements.img4, factor: 0.2 },
+                        { element: cachedElements.img5, factor: -0.8 },
+                        { element: cachedElements.img7, factor: -1.7 },
+                        { element: cachedElements.img8, factor: 0.5 },
                     ];
 
-                    imgConfigs.forEach(({ selector, factor }) => {
-                        if (step3Reached.current) return;
-                        gsap.to(selector, {
-                            x: currentX * moveAmount * factor,
-                            y: currentY * moveAmountY * factor,
-                            duration: 0.8,
-                            ease: "power2.out",
-                            overwrite: "auto",
-                            force3D: true,
-                        });
+                    imgConfigs.forEach(({ element, factor }) => {
+                        if (!element) return;
+                        const x = currentX * moveAmount * factor;
+                        const y = currentY * moveAmountY * factor;
+                        
+                        // Use direct style manipulation for better performance
+                        element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+                        element.style.willChange = 'transform';
                     });
 
                     rafId = null;
+                    isAnimating = false;
                 });
             };
 
-            window.addEventListener("mousemove", handleMouseMove);
+            // Use passive event listener for better performance
+            window.addEventListener("mousemove", handleMouseMove, { passive: true });
+            
+            // Update cache on resize
+            const handleResize = () => {
+                updateCache();
+            };
+            window.addEventListener('resize', handleResize, { passive: true });
+            
             return () => {
                 window.removeEventListener("mousemove", handleMouseMove);
-                if (rafId) cancelAnimationFrame(rafId);
+                window.removeEventListener('resize', handleResize);
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
             };
         }, scopeRef);
 
@@ -126,7 +177,11 @@ export default function AboutComponent() {
             gsap.set(".gradient", { opacity: 0, y: 30 });
 
             const tl = gsap.timeline({
-                defaults: { force3D: true, willChange: "transform, opacity" },
+                defaults: { 
+                    force3D: true, 
+                    willChange: "transform, opacity",
+                    ease: "power2.inOut"
+                },
                 scrollTrigger: {
                     trigger: wrapperRef.current,
                     start: "top 80%",
@@ -138,19 +193,22 @@ export default function AboutComponent() {
                     onUpdate: (self) => {
                         if (cursorRef.current) {
                             const progress = self.progress;
-                            const showCursor =
-                                progress > 0.15 && progress < 0.35;
-                            gsap.set(cursorRef.current, {
-                                display: showCursor ? "block" : "none",
-                                opacity: showCursor ? 1 : 0,
-                                willChange: "opacity",
+                            const showCursor = progress > 0.15 && progress < 0.35;
+                            
+                            // Use requestAnimationFrame for smooth cursor updates
+                            requestAnimationFrame(() => {
+                                gsap.set(cursorRef.current, {
+                                    display: showCursor ? "block" : "none",
+                                    opacity: showCursor ? 1 : 0,
+                                    willChange: "opacity",
+                                });
                             });
                         }
                     },
                 },
             });
 
-            // Step 1: Initial entrance (0-20%)
+            // Step 1: Initial entrance (0-20%) - Optimized
             tl.from(
                 [
                     ".img1",
@@ -167,6 +225,8 @@ export default function AboutComponent() {
                     duration: 2,
                     ease: "power2.inOut",
                     overwrite: "auto",
+                    force3D: true,
+                    willChange: "opacity, transform",
                 },
                 0
             )
@@ -272,8 +332,11 @@ export default function AboutComponent() {
                     0.3
                 );
 
-            // Step 2: Typing animation and image movements (20-50%)
+            // Step 2: Typing animation and image movements (20-50%) - Optimized
             const chars = { value: 0 };
+            let lastUpdateTime = 0;
+            const updateThrottle = 16; // ~60fps
+            
             tl.to(
                 chars,
                 {
@@ -282,6 +345,10 @@ export default function AboutComponent() {
                     ease: "none",
                     onStart: () => handlePlayAnimation(),
                     onUpdate: () => {
+                        const now = performance.now();
+                        if (now - lastUpdateTime < updateThrottle) return;
+                        lastUpdateTime = now;
+                        
                         if (inputRef.current) {
                             const currentText = text.slice(
                                 0,
@@ -302,6 +369,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3
                 )
@@ -313,6 +382,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3
                 )
@@ -324,6 +395,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3
                 )
@@ -335,6 +408,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3
                 )
@@ -346,29 +421,32 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3
                 )
                 .to(
                     ".img6",
                     {
-                        x: () =>
-                            window.innerWidth / 2 -
-                            document
-                                .querySelector(".img6")
-                                .getBoundingClientRect().left -
-                            document.querySelector(".img6").offsetWidth / 2,
-                        y: () =>
-                            window.innerHeight / 2 -
-                            document
-                                .querySelector(".img6")
-                                .getBoundingClientRect().top -
-                            document.querySelector(".img6").offsetHeight / 2 +
-                            40,
+                        x: () => {
+                            const img6 = document.querySelector(".img6");
+                            if (!img6) return 0;
+                            const rect = img6.getBoundingClientRect();
+                            return window.innerWidth / 2 - rect.left - img6.offsetWidth / 2;
+                        },
+                        y: () => {
+                            const img6 = document.querySelector(".img6");
+                            if (!img6) return 0;
+                            const rect = img6.getBoundingClientRect();
+                            return window.innerHeight / 2 - rect.top - img6.offsetHeight / 2 + 40;
+                        },
                         scale: 2.8,
                         duration: 3,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                         onStart: () => {
                             step3Reached.current = true;
                         },
@@ -383,6 +461,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3
                 )
@@ -394,6 +474,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3
                 )
@@ -405,6 +487,8 @@ export default function AboutComponent() {
                         duration: 2,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     3.5
                 )
@@ -416,6 +500,8 @@ export default function AboutComponent() {
                         duration: 2,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     3.5
                 )
@@ -423,24 +509,23 @@ export default function AboutComponent() {
                     ".input-field",
                     {
                         scale: 1.2,
-                        x: () =>
-                            window.innerWidth / 2 -
-                            document
-                                .querySelector(".input-field")
-                                .getBoundingClientRect().left -
-                            document.querySelector(".input-field").offsetWidth /
-                                2,
-                        y: () =>
-                            window.innerHeight / 4 -
-                            document
-                                .querySelector(".input-field")
-                                .getBoundingClientRect().top -
-                            document.querySelector(".input-field")
-                                .offsetHeight /
-                                2,
+                        x: () => {
+                            const inputField = document.querySelector(".input-field");
+                            if (!inputField) return 0;
+                            const rect = inputField.getBoundingClientRect();
+                            return window.innerWidth / 2 - rect.left - inputField.offsetWidth / 2;
+                        },
+                        y: () => {
+                            const inputField = document.querySelector(".input-field");
+                            if (!inputField) return 0;
+                            const rect = inputField.getBoundingClientRect();
+                            return window.innerHeight / 4 - rect.top - inputField.offsetHeight / 2;
+                        },
                         duration: 2,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     3.5
                 )
@@ -461,6 +546,8 @@ export default function AboutComponent() {
                         duration: 0.3,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "opacity",
                     },
                     3.6
                 )
@@ -471,18 +558,22 @@ export default function AboutComponent() {
                         duration: 2,
                         ease: "power3.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                         onComplete: () => {
                             gsap.to(".glass", {
                                 opacity: 0,
                                 duration: 1.5,
                                 ease: "power2.inOut",
+                                force3D: true,
+                                willChange: "opacity",
                             });
                         },
                     },
                     3.8
                 );
 
-            // Step 3: Show discovery content (50-65%)
+            // Step 3: Show discovery content (50-65%) - Optimized
             tl.to(
                 heading.words,
                 {
@@ -492,6 +583,8 @@ export default function AboutComponent() {
                     stagger: 0.25,
                     ease: "power3.inOut",
                     overwrite: "auto",
+                    force3D: true,
+                    willChange: "transform, opacity",
                 },
                 4.2
             )
@@ -505,6 +598,8 @@ export default function AboutComponent() {
                         stagger: 0.25,
                         ease: "power3.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     4.2
                 )
@@ -517,6 +612,8 @@ export default function AboutComponent() {
                         stagger: 0.25,
                         ease: "power3.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     4.4
                 )
@@ -527,6 +624,8 @@ export default function AboutComponent() {
                         duration: 2,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "opacity",
                     },
                     4.6
                 );
@@ -604,15 +703,19 @@ export default function AboutComponent() {
                 .to(
                     ".img6",
                     {
-                        x: () =>
-                            gsap.getProperty(".img6", "x") -
-                            window.innerWidth * 0.1,
-                        y: () =>
-                            gsap.getProperty(".img6", "y") -
-                            window.innerHeight * 0.05,
+                        x: () => {
+                            const currentX = gsap.getProperty(".img6", "x");
+                            return currentX - window.innerWidth * 0.1;
+                        },
+                        y: () => {
+                            const currentY = gsap.getProperty(".img6", "y");
+                            return currentY - window.innerHeight * 0.05;
+                        },
                         duration: 2,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform",
                     },
                     8
                 )
@@ -736,7 +839,7 @@ export default function AboutComponent() {
                     8.3
                 );
 
-            // Step 5: Exit animations (80-100%)
+            // Step 5: Exit animations (80-100%) - Optimized
             tl.to(
                 ".img6",
                 {
@@ -745,6 +848,8 @@ export default function AboutComponent() {
                     duration: 2.5,
                     ease: "power2.inOut",
                     overwrite: "auto",
+                    force3D: true,
+                    willChange: "transform, opacity",
                 },
                 10.5
             )
@@ -756,6 +861,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     10
                 )
@@ -767,6 +874,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     10.2
                 )
@@ -778,6 +887,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     10.3
                 )
@@ -789,6 +900,8 @@ export default function AboutComponent() {
                         duration: 2.5,
                         ease: "power2.inOut",
                         overwrite: "auto",
+                        force3D: true,
+                        willChange: "transform, opacity",
                     },
                     10.5
                 )
@@ -881,25 +994,20 @@ export default function AboutComponent() {
         return () => ctx.revert();
     }, []);
 
-    // Cursor blinking animation
+    // Cursor blinking animation - Optimized
     useEffect(() => {
         if (!scopeRef.current) return;
         const ctx = gsap.context(() => {
             if (!cursorRef.current) return;
-            const cursorTl = gsap.timeline({ repeat: -1 });
-            cursorTl
-                .to(cursorRef.current, {
-                    opacity: 0,
-                    duration: 0.6,
-                    ease: "power1.inOut",
-                })
-                .to(cursorRef.current, {
-                    opacity: 1,
-                    duration: 0.6,
-                    ease: "power1.inOut",
-                });
-
-            return () => cursorTl.kill();
+            
+            // Use CSS animation for better performance
+            cursorRef.current.style.animation = 'cursorBlink 1.2s infinite';
+            
+            return () => {
+                if (cursorRef.current) {
+                    cursorRef.current.style.animation = '';
+                }
+            };
         }, scopeRef);
 
         return () => ctx.revert();
