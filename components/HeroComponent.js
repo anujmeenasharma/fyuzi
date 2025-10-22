@@ -100,12 +100,12 @@ export default function HeroComponent() {
 
   return (
     <div
-      className="font-sans h-screen w-full relative text-white flex-center"
+      className="font-sans h-screen w-full relative text-white overflow-hidden flex-center"
       ref={homeContainer}
       style={{ willChange: "opacity" }}
     >
       <div
-        className="w-full h-full home-cont overflow-hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-100"
+        className="w-full h-full home-cont overflow-hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-black rounded-2xl z-100"
         ref={homeContRef}
         style={{ willChange: "transform, border-radius" }}
       >
