@@ -105,7 +105,7 @@ export default function HeroComponent() {
       style={{ willChange: "opacity" }}
     >
       <div
-        className="w-full h-full home-cont overflow-hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-black rounded-2xl z-100"
+        className="w-full h-full home-cont overflow-hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl z-100"
         ref={homeContRef}
         style={{ willChange: "transform, border-radius" }}
       >
