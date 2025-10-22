@@ -1,13 +1,14 @@
 "use client";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SparkleSvg from "./SparkleSvg";
 import SparkleSvg2 from "./SparkleSvg2";
 import LiquidEther from "./LiquidEther";
 import { ScrollTrigger } from "gsap/all";
+import { isSafari, addSafariClass } from "@/lib/utils/safariDetection";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +16,23 @@ export default function HeroComponent() {
   const homeContainer = useRef();
   const scrollBtn = useRef();
   const homeContRef = useRef();
+  
+  // Add Safari class to body for CSS targeting
+  useEffect(() => {
+    addSafariClass();
+    
+    // Safari-specific initialization
+    if (isSafari() && homeContRef.current) {
+      // Initialize border-radius for Safari
+      homeContRef.current.style.setProperty('--border-radius', '0px');
+      homeContRef.current.style.borderRadius = '0px';
+      homeContRef.current.style.webkitBorderRadius = '0px';
+      
+      // Force hardware acceleration
+      homeContRef.current.style.transform = 'translateZ(0)';
+      homeContRef.current.style.webkitTransform = 'translateZ(0)';
+    }
+  }, []);
 
   useGSAP(() => {
     const bottomlinks = homeContRef.current.querySelectorAll(".bottomlink");
@@ -61,19 +79,53 @@ export default function HeroComponent() {
       );
 
     // Animate .home-cont with transformOrigin at center for proper zoom out
-    gsap.to(homeContRef.current, {
-      scaleX: 0.95,
-      scaleY: 0.75,
-      borderRadius: 56,
-      transformOrigin: "50% 50%",
-      willChange: "transform, border-radius",
-      scrollTrigger: {
-        trigger: homeContainer.current,
-        start: "bottom bottom",
-        end: "bottom top",
-        scrub: 2,
-      },
-    });
+    // Safari-compatible border-radius animation
+    const isSafariBrowser = isSafari();
+    
+    if (isSafariBrowser) {
+      // Safari-specific animation with CSS custom properties
+      gsap.to(homeContRef.current, {
+        scaleX: 0.95,
+        scaleY: 0.75,
+        transformOrigin: "50% 50%",
+        willChange: "transform",
+        force3D: true,
+        scrollTrigger: {
+          trigger: homeContainer.current,
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: 2,
+          onUpdate: (self) => {
+            // Use CSS custom property for Safari compatibility
+            const progress = self.progress;
+            const borderRadius = 0 + (56 * progress);
+            
+            // Apply border-radius with Safari-specific prefixes
+            homeContRef.current.style.setProperty('--border-radius', `${borderRadius}px`);
+            homeContRef.current.style.borderRadius = `${borderRadius}px`;
+            homeContRef.current.style.webkitBorderRadius = `${borderRadius}px`;
+            
+            // Force repaint for Safari
+            homeContRef.current.style.transform = `translateZ(0) scale(${0.95 + (0.05 * (1 - progress))}, ${0.75 + (0.25 * (1 - progress))})`;
+          }
+        },
+      });
+    } else {
+      // Standard animation for other browsers
+      gsap.to(homeContRef.current, {
+        scaleX: 0.95,
+        scaleY: 0.75,
+        borderRadius: 56,
+        transformOrigin: "50% 50%",
+        willChange: "transform, border-radius",
+        scrollTrigger: {
+          trigger: homeContainer.current,
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: 2,
+        },
+      });
+    }
 
     gsap.from(bottomlinks, {
       y: 40,
