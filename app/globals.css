@@ -1,6 +1,77 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Safari Hardware Acceleration Optimizations */
+.safari-optimized {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  -webkit-transform-style: preserve-3d;
+  contain: layout style paint;
+  isolation: isolate;
+}
+
+.hardware-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Safari-specific scroll behavior */
+.safari-browser {
+  scroll-behavior: auto;
+}
+
+.safari-browser * {
+  scroll-behavior: auto;
+}
+
+/* Safari mobile optimizations */
+.safari-mobile {
+  -webkit-overflow-scrolling: touch;
+  -webkit-transform: translateZ(0);
+}
+
+/* Safari desktop optimizations */
+.safari-desktop {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Performance optimizations for animated elements */
+.animated-element {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* GSAP optimized elements */
+.gsap-element {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Three.js canvas optimizations */
+.three-canvas {
+  transform: translateZ(0);
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
 /* @custom-variant dark (&:is(.dark *)); */
 
 @theme inline {

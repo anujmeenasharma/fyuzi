@@ -11,6 +11,12 @@ import { ScrollTrigger } from "gsap/all";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Safari-specific ScrollTrigger configuration
+ScrollTrigger.config({
+  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+  ignoreMobileResize: true
+});
+
 export default function HeroComponent() {
   const homeContainer = useRef();
   const scrollBtn = useRef();
@@ -66,6 +72,7 @@ export default function HeroComponent() {
       scaleY: 0.75,
       borderRadius: 56,
       transformOrigin: "50% 50%",
+      force3D: true,
       willChange: "transform, border-radius",
       scrollTrigger: {
         trigger: homeContainer.current,

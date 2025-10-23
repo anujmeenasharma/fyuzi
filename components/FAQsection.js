@@ -3,6 +3,15 @@ import { faqContent } from "@/lib/content";
 import { useGSAP } from "@gsap/react";
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+// Safari-specific ScrollTrigger configuration
+ScrollTrigger.config({
+  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+  ignoreMobileResize: true
+});
 
 export default function FAQsection() {
   const [activeTab, setActiveTab] = useState("");
@@ -26,6 +35,8 @@ export default function FAQsection() {
       scaleX: 1,
       scaleY: 1,
       borderRadius: 0,
+      force3D: true,
+      willChange: "transform, border-radius",
       scrollTrigger: {
         trigger: homeContainer.current,
         start: "top bottom",

@@ -4,6 +4,7 @@ import { Inter, Archivo } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import SafariDetection from "@/lib/utils/safariDetection";
+import { setupSafariOptimizations } from "@/lib/utils/safariOptimizationInit";
 
 // Google Fonts
 const geistSans = Geist({
@@ -48,12 +49,26 @@ export default function RootLayout({ children }) {
                 
                 if (isSafari) {
                   document.documentElement.classList.add('safari-browser');
+                  // Disable smooth scrolling for Safari
+                  document.documentElement.style.scrollBehavior = 'auto';
+                  document.body.style.scrollBehavior = 'auto';
                 }
                 if (isIOS) {
                   document.documentElement.classList.add('ios-device');
                 }
                 if (isSafari && isIOS) {
                   document.documentElement.classList.add('safari-mobile');
+                }
+                
+                // Initialize Safari optimizations
+                if (typeof window !== 'undefined') {
+                  window.safariOptimizations = {
+                    isSafari: isSafari,
+                    isIOS: isIOS,
+                    isMobile: isIOS,
+                    pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+                    targetFPS: isSafari ? 30 : 60
+                  };
                 }
               })();
             `,

@@ -5,6 +5,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Safari-specific ScrollTrigger configuration
+ScrollTrigger.config({
+  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+  ignoreMobileResize: true
+});
+
 const FeaturesComponent = () => {
     const containerRef = useRef(null);
     const h1Refs = useRef([]);
@@ -29,10 +35,11 @@ const FeaturesComponent = () => {
         gsap.to(paragraphRef.current, {
             y: 0,
             backdropFilter: 'blur(0px)',
-            
             opacity: 1,
             duration: 0.8,
             ease: "power2.inOut",
+            force3D: true,
+            willChange: "transform, opacity, backdrop-filter",
             scrollTrigger: {
                 trigger: paragraphRef.current,
                 start: "top 80%",
@@ -47,6 +54,8 @@ const FeaturesComponent = () => {
                 duration: 0.8,
                 delay: index * 0.001,
                 ease: "power2.inOut",
+                force3D: true,
+                willChange: "transform, opacity",
                 scrollTrigger: {
                     trigger: h1,
                     start: "top 99%",
@@ -83,6 +92,8 @@ const FeaturesComponent = () => {
               width: `${elementProgress * 100}%`,
               duration: 0.1,
               ease: "none",
+              force3D: true,
+              willChange: "width"
             });
           }
         });

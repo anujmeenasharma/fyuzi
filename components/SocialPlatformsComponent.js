@@ -7,6 +7,12 @@ import { SplitText } from "gsap/SplitText";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
+// Safari-specific ScrollTrigger configuration
+ScrollTrigger.config({
+  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+  ignoreMobileResize: true
+});
+
 export default function SocialPlatformsComponent() {
   const headingRef = useRef(null);
   const paraRef = useRef(null);

@@ -9,6 +9,12 @@ import GlassDemo from "./GlassElement";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Safari-specific ScrollTrigger configuration
+ScrollTrigger.config({
+  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+  ignoreMobileResize: true
+});
+
 export default function AboutComponent() {
     const aboutCont = useRef(null);
     const inputRef = useRef(null);

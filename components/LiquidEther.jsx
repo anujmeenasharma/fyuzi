@@ -88,14 +88,18 @@ export default function LiquidEther({
         // Safari detection and compatibility fixes
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        this.pixelRatio = isSafari ? Math.min(window.devicePixelRatio || 1, 1) : Math.min(window.devicePixelRatio || 1, 2);
+        // Cap pixelRatio at 2 for better performance
+        this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
         this.resize();
         this.renderer = new THREE.WebGLRenderer({ 
-          antialias: isSafari ? true : false, // Safari needs antialiasing
+          antialias: isMobile ? false : (isSafari ? true : false), // Disable antialias on mobile, enable on Safari desktop
           alpha: true,
           powerPreference: isSafari ? "default" : "high-performance", // Safari has issues with high-performance mode
-          precision: isSafari ? "mediump" : "highp" // Safari works better with medium precision
+          precision: isSafari ? "mediump" : "highp", // Safari works better with medium precision
+          failIfMajorPerformanceCaveat: false, // Allow fallback for Safari
+          preserveDrawingBuffer: true, // Better for Safari
         });
         this.renderer.autoClear = false;
         this.renderer.setClearColor(new THREE.Color(0x000000), 0);

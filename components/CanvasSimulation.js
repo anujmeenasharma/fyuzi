@@ -7,9 +7,11 @@ import {
   renderVertexShader,
   renderFragmentShader,
 } from "./shaders.js";
+import { useMemoryManagement } from "../lib/utils/memoryManagement.js";
 
 const CanvasSimulation = () => {
   const containerRef = useRef();
+  const { manager, cleanup } = useMemoryManagement();
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -19,16 +21,19 @@ const CanvasSimulation = () => {
     // Safari detection and compatibility fixes
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     const renderer = new THREE.WebGLRenderer({
-      antialias: isSafari ? true : false, // Safari needs antialiasing for proper rendering
+      antialias: isMobile ? false : (isSafari ? true : false), // Disable antialias on mobile, enable on Safari desktop
       alpha: true,
       preserveDrawingBuffer: true,
       powerPreference: isSafari ? "default" : "high-performance", // Safari has issues with high-performance mode
       precision: isSafari ? "mediump" : "highp", // Safari works better with medium precision
+      failIfMajorPerformanceCaveat: false, // Allow fallback for Safari
     });
 
-    const pixelRatio = isSafari ? Math.min(window.devicePixelRatio, 1) : Math.min(window.devicePixelRatio, 1.5);
+    // Cap pixelRatio at 2 for better performance
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     const width = window.innerWidth * pixelRatio;
     const height = window.innerHeight * pixelRatio;
 
@@ -83,6 +88,14 @@ const CanvasSimulation = () => {
     const simQuad = new THREE.Mesh(plane, simMaterial);
     const renderQuad = new THREE.Mesh(plane, renderMaterial);
 
+    // Register objects with memory manager
+    manager.threeJS.registerGeometry(plane);
+    manager.threeJS.registerMaterial(simMaterial);
+    manager.threeJS.registerMaterial(renderMaterial);
+    manager.threeJS.registerRenderer(renderer);
+    manager.threeJS.registerScene(scene);
+    manager.threeJS.registerScene(simScene);
+
     simScene.add(simQuad);
     scene.add(renderQuad);
 
@@ -95,6 +108,9 @@ const CanvasSimulation = () => {
     textTexture.minFilter = THREE.LinearFilter;
     textTexture.magFilter = THREE.LinearFilter;
     textTexture.format = THREE.RGBAFormat;
+    
+    // Register texture with memory manager
+    manager.threeJS.registerTexture(textTexture);
 
     const backgroundColor = "#fb7427";
 
@@ -191,15 +207,13 @@ const CanvasSimulation = () => {
       handleMouseMove(event);
     };
 
-    renderer.domElement.addEventListener("mousemove", handleMouseMove);
-    renderer.domElement.addEventListener("mouseleave", handleMouseLeave);
-    
-    // Add touch events for Safari compatibility
-    renderer.domElement.addEventListener("touchstart", handleTouchMove, { passive: false });
-    renderer.domElement.addEventListener("touchmove", handleTouchMove, { passive: false });
-    renderer.domElement.addEventListener("touchend", handleMouseLeave);
-    
-    window.addEventListener("resize", handleResize);
+    // Register event listeners with memory manager
+    manager.events.addEventListener(renderer.domElement, "mousemove", handleMouseMove);
+    manager.events.addEventListener(renderer.domElement, "mouseleave", handleMouseLeave);
+    manager.events.addEventListener(renderer.domElement, "touchstart", handleTouchMove, { passive: false });
+    manager.events.addEventListener(renderer.domElement, "touchmove", handleTouchMove, { passive: false });
+    manager.events.addEventListener(renderer.domElement, "touchend", handleMouseLeave);
+    manager.events.addEventListener(window, "resize", handleResize);
 
     const animate = (currentTime) => {
       // Frame limiting for consistent 60fps
@@ -224,21 +238,14 @@ const CanvasSimulation = () => {
 
       [rtA, rtB] = [rtB, rtA];
 
-      requestAnimationFrame(animate);
+      manager.requestAnimationFrame(animate);
     };
 
     animate();
 
     return () => {
-      renderer.dispose();
-      rtA.dispose();
-      rtB.dispose();
-      window.removeEventListener("resize", handleResize);
-      renderer.domElement.removeEventListener("mousemove", handleMouseMove);
-      renderer.domElement.removeEventListener("mouseleave", handleMouseLeave);
-      renderer.domElement.removeEventListener("touchstart", handleTouchMove);
-      renderer.domElement.removeEventListener("touchmove", handleTouchMove);
-      renderer.domElement.removeEventListener("touchend", handleMouseLeave);
+      // Use comprehensive memory manager cleanup
+      cleanup();
     };
   }, []);
 

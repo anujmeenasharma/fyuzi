@@ -473,10 +473,14 @@ class App {
   }
 
   createRenderer() {
+    // Safari detection for optimization
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     this.renderer = new Renderer({
       alpha: true,
-      antialias: true,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
+      antialias: isMobile ? false : (isSafari ? true : false), // Disable antialias on mobile, enable on Safari desktop
+      dpr: Math.min(window.devicePixelRatio || 1, 2) // Cap at 2 for better performance
     });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
