@@ -1,4 +1,5 @@
 "use client";
+
 import AboutComponent from "@/components/AboutComponent";
 import HeroComponent from "@/components/HeroComponent";
 import useLenis from "@/lib/hooks/useLenis";
@@ -27,11 +28,6 @@ export default function Home() {
     const progressLineRef = useRef();
     const brandNameRef = useRef();
     const counterGroupRef = useRef();
-
-    useEffect(() => {
-        const t = setTimeout(() => window.scrollTo(0, 0), 200);
-        return () => clearTimeout(t);
-    }, []);
 
     // Loader inside Home component
 useGSAP(() => {
