@@ -119,7 +119,7 @@ export default function AboutComponent() {
                         const y = currentY * moveAmountY * factor;
                         
                         element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                        element.style.willChange = 'transform';
+                        ;
                     });
 
                     rafId = null;
@@ -241,7 +241,7 @@ export default function AboutComponent() {
                         
                         // Use direct style manipulation for better performance
                         element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                        element.style.willChange = 'transform';
+                        ;
                     });
 
                     rafId = null;
@@ -301,7 +301,7 @@ export default function AboutComponent() {
             const tl = gsap.timeline({
                 defaults: { 
                     force3D: true, 
-                    willChange: "transform, opacity",
+                    
                     ease: "power2.inOut"
                 },
                 scrollTrigger: {
@@ -322,7 +322,7 @@ export default function AboutComponent() {
                                 gsap.set(cursorRef.current, {
                                     display: showCursor ? "block" : "none",
                                     opacity: showCursor ? 1 : 0,
-                                    willChange: "opacity",
+                                    
                                 });
                             });
                         }
@@ -348,7 +348,7 @@ export default function AboutComponent() {
                     ease: "power2.inOut",
                     overwrite: "auto",
                     force3D: true,
-                    willChange: "opacity, transform",
+                    
                 },
                 0
             )
@@ -492,7 +492,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3
                 )
@@ -505,7 +505,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3
                 )
@@ -518,7 +518,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3
                 )
@@ -531,7 +531,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3
                 )
@@ -544,7 +544,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3
                 )
@@ -568,7 +568,7 @@ export default function AboutComponent() {
                         ease: "power4.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                         onStart: () => {
                             step3Reached.current = true;
                         },
@@ -584,7 +584,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3
                 )
@@ -597,7 +597,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3
                 )
@@ -610,7 +610,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     3.5
                 )
@@ -623,7 +623,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     3.5
                 )
@@ -647,7 +647,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     3.5
                 )
@@ -673,7 +673,7 @@ export default function AboutComponent() {
                     ease: "power3.inOut",
                     overwrite: "auto",
                     force3D: true,
-                    willChange: "transform, opacity",
+                    
                 },
                 4.2
             )
@@ -688,7 +688,7 @@ export default function AboutComponent() {
                         ease: "power3.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     4.2
                 )
@@ -702,7 +702,7 @@ export default function AboutComponent() {
                         ease: "power3.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     4.4
                 )
@@ -714,7 +714,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "opacity",
+                        
                     },
                     4.6
                 );
@@ -804,7 +804,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform",
+                        
                     },
                     8
                 )
@@ -938,7 +938,7 @@ export default function AboutComponent() {
                     ease: "power2.inOut",
                     overwrite: "auto",
                     force3D: true,
-                    willChange: "transform, opacity",
+                    
                 },
                 10.5
             )
@@ -951,7 +951,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     10
                 )
@@ -964,7 +964,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     10.2
                 )
@@ -977,7 +977,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     10.3
                 )
@@ -990,7 +990,7 @@ export default function AboutComponent() {
                         ease: "power2.inOut",
                         overwrite: "auto",
                         force3D: true,
-                        willChange: "transform, opacity",
+                        
                     },
                     10.5
                 )
