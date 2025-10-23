@@ -413,7 +413,7 @@ export default function AboutComponent() {
                         right: "-12vw",
                         top: "-5vh",
                         duration: 2,
-                        ease: "power2.inOut",
+                        ease: "expo.inOut",
                         overwrite: "auto",
                     },
                     0
