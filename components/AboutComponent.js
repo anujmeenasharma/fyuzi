@@ -545,39 +545,6 @@ export default function AboutComponent() {
                     },
                     4
                 )
-                .to(
-                    ".glass",
-                    {
-                        opacity: 1,
-                        duration: 0.3,
-                        ease: "power2.inOut",
-                        overwrite: "auto",
-                        force3D: true,
-                        willChange: "opacity",
-                    },
-                    3.6
-                )
-                .to(
-                    ".glass",
-                    {
-                        top: 200,
-                        duration: 2,
-                        ease: "power3.inOut",
-                        overwrite: "auto",
-                        force3D: true,
-                        willChange: "transform",
-                        onComplete: () => {
-                            gsap.to(".glass", {
-                                opacity: 0,
-                                duration: 1.5,
-                                ease: "power2.inOut",
-                                force3D: true,
-                                willChange: "opacity",
-                            });
-                        },
-                    },
-                    3.8
-                );
 
             // Step 3: Show discovery content (50-65%) - Optimized
             tl.to(
