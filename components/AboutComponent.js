@@ -565,7 +565,7 @@ export default function AboutComponent() {
                         },
                         scale: 2.8,
                         duration: 3,
-                        ease: "power2.inOut",
+                        ease: "power4.inOut",
                         overwrite: "auto",
                         force3D: true,
                         willChange: "transform",
