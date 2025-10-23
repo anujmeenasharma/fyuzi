@@ -9,20 +9,21 @@ import SparkleSvg2 from "./SparkleSvg2";
 import LiquidEther from "./LiquidEther";
 import { ScrollTrigger } from "gsap/all";
 
-gsap.registerPlugin(ScrollTrigger);
-
-// Safari-specific ScrollTrigger configuration
-ScrollTrigger.config({
-  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-  ignoreMobileResize: true
-});
-
 export default function HeroComponent() {
   const homeContainer = useRef();
   const scrollBtn = useRef();
   const homeContRef = useRef();
 
   useGSAP(() => {
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Safari-specific ScrollTrigger configuration
+    ScrollTrigger.config({
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+      ignoreMobileResize: true
+    });
+
     const bottomlinks = homeContRef.current.querySelectorAll(".bottomlink");
     const tl1 = gsap.timeline({
       repeat: -1,

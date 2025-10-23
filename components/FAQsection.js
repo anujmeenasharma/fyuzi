@@ -1,17 +1,13 @@
 "use client";
 import { faqContent } from "@/lib/content";
 import { useGSAP } from "@gsap/react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
-
-// Safari-specific ScrollTrigger configuration
-ScrollTrigger.config({
-  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-  ignoreMobileResize: true
-});
+// ✅ REMOVED - Don't register or configure at module level
+// gsap.registerPlugin(ScrollTrigger);
+// ScrollTrigger.config({ ... });
 
 export default function FAQsection() {
   const [activeTab, setActiveTab] = useState("");
@@ -23,6 +19,14 @@ export default function FAQsection() {
   };
 
   useGSAP(() => {
+    // ✅ Register plugin and configure INSIDE useGSAP
+    gsap.registerPlugin(ScrollTrigger);
+    
+    ScrollTrigger.config({
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+      ignoreMobileResize: true
+    });
+
     gsap.set(homeContainer.current, {
       scaleX: 0.95,
       scaleY: 0.75,

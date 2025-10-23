@@ -29,6 +29,11 @@ export default function Home() {
     const brandNameRef = useRef();
     const counterGroupRef = useRef();
 
+    useEffect(() => {
+        const t = setTimeout(() => window.scrollTo(0, 0), 200);
+        return () => clearTimeout(t);
+    }, []);
+
     // Loader inside Home component
 useGSAP(() => {
     if (!loaderRef.current) return;

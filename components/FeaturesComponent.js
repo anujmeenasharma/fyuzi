@@ -3,15 +3,16 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
-
-// Safari-specific ScrollTrigger configuration
-ScrollTrigger.config({
-  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-  ignoreMobileResize: true
-});
-
 const FeaturesComponent = () => {
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Safari-specific ScrollTrigger configuration
+    ScrollTrigger.config({
+        autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+        ignoreMobileResize: true
+    });
+
     const containerRef = useRef(null);
     const h1Refs = useRef([]);
     const paragraphRef = useRef(null);
@@ -74,42 +75,42 @@ const FeaturesComponent = () => {
                 const totalProgress = self.progress;
                 const progressPerElement = 1 / totalElements;
 
-        h1Elements.forEach((h1, index) => {
-          const blackSpan = h1.querySelector(".text-black");
-          if (blackSpan) {
-            const elementStartProgress = index * progressPerElement;
-            const elementEndProgress = (index + 1) * progressPerElement;
-            let elementProgress = 0;
-            if (totalProgress >= elementStartProgress) {
-              if (totalProgress <= elementEndProgress) {
-                elementProgress =
-                  (totalProgress - elementStartProgress) / progressPerElement;
-              } else {
-                elementProgress = 1;
-              }
-            }
-            gsap.to(blackSpan, {
-              width: `${elementProgress * 100}%`,
-              duration: 0.1,
-              ease: "none",
-              force3D: true,
-              willChange: "width"
-            });
-          }
+                h1Elements.forEach((h1, index) => {
+                    const blackSpan = h1.querySelector(".text-black");
+                    if (blackSpan) {
+                        const elementStartProgress = index * progressPerElement;
+                        const elementEndProgress = (index + 1) * progressPerElement;
+                        let elementProgress = 0;
+                        if (totalProgress >= elementStartProgress) {
+                            if (totalProgress <= elementEndProgress) {
+                                elementProgress =
+                                    (totalProgress - elementStartProgress) / progressPerElement;
+                            } else {
+                                elementProgress = 1;
+                            }
+                        }
+                        gsap.to(blackSpan, {
+                            width: `${elementProgress * 100}%`,
+                            duration: 0.1,
+                            ease: "none",
+                            force3D: true,
+                            willChange: "width"
+                        });
+                    }
+                });
+            },
         });
-      },
-    });
 
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+        return () => {
+            ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+        };
+    }, []);
+
+    const addToRefs = (el) => {
+        if (el && !h1Refs.current.includes(el)) {
+            h1Refs.current.push(el);
+        }
     };
-  }, []);
-
-  const addToRefs = (el) => {
-    if (el && !h1Refs.current.includes(el)) {
-      h1Refs.current.push(el);
-    }
-  };
 
     return (
         <div ref={containerRef} className="h-fit w-full relative py-20">

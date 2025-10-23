@@ -7,13 +7,9 @@ import { ScrollTrigger } from "gsap/all";
 import SplitType from "split-type";
 import GlassDemo from "./GlassElement";
 
-gsap.registerPlugin(ScrollTrigger);
-
-// Safari-specific ScrollTrigger configuration
-ScrollTrigger.config({
-  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-  ignoreMobileResize: true
-});
+// ✅ REMOVED - Don't register plugin or config at module level
+// gsap.registerPlugin(ScrollTrigger);
+// ScrollTrigger.config({ ... });
 
 export default function AboutComponent() {
     const aboutCont = useRef(null);
@@ -43,6 +39,126 @@ export default function AboutComponent() {
     // Mouse move parallax effect - Optimized
     useEffect(() => {
         if (!scopeRef.current) return;
+        const ctx = gsap.context(() => {
+            let rafId = null;
+            let currentX = 0;
+            let currentY = 0;
+            let isAnimating = false;
+            
+            // Cache DOM elements and dimensions
+            let cachedDims = null;
+            let cachedElements = null;
+            
+            const updateCache = () => {
+                if (!aboutCont.current) return;
+                cachedDims = aboutCont.current.getBoundingClientRect();
+                cachedElements = {
+                    img1: document.querySelector('.img1'),
+                    img2: document.querySelector('.img2'),
+                    img3: document.querySelector('.img3'),
+                    img4: document.querySelector('.img4'),
+                    img5: document.querySelector('.img5'),
+                    img7: document.querySelector('.img7'),
+                    img8: document.querySelector('.img8')
+                };
+            };
+            
+            updateCache();
+            
+            // Throttle mouse move events
+            let lastMoveTime = 0;
+            const throttleDelay = 16; // ~60fps
+
+            const handleMouseMove = (e) => {
+                const now = performance.now();
+                if (now - lastMoveTime < throttleDelay) return;
+                lastMoveTime = now;
+                
+                if (!cachedDims || !cachedElements) {
+                    updateCache();
+                    return;
+                }
+                
+                currentX = gsap.utils.clamp(
+                    -1,
+                    1,
+                    ((e.clientX - cachedDims.left) / cachedDims.width) * 2 - 1
+                );
+                currentY = gsap.utils.clamp(
+                    -1,
+                    1,
+                    ((e.clientY - cachedDims.top) / cachedDims.height) * 2 - 1
+                );
+
+                if (rafId || isAnimating) return;
+                isAnimating = true;
+
+                rafId = requestAnimationFrame(() => {
+                    if (step3Reached.current) {
+                        rafId = null;
+                        isAnimating = false;
+                        return;
+                    }
+                    
+                    const moveAmount = 40;
+                    const moveAmountY = 30;
+                    
+                    const imgConfigs = [
+                        { element: cachedElements.img1, factor: 1.5 },
+                        { element: cachedElements.img2, factor: 1 },
+                        { element: cachedElements.img3, factor: 0.6 },
+                        { element: cachedElements.img4, factor: 0.2 },
+                        { element: cachedElements.img5, factor: -0.8 },
+                        { element: cachedElements.img7, factor: -1.7 },
+                        { element: cachedElements.img8, factor: 0.5 },
+                    ];
+
+                    imgConfigs.forEach(({ element, factor }) => {
+                        if (!element) return;
+                        const x = currentX * moveAmount * factor;
+                        const y = currentY * moveAmountY * factor;
+                        
+                        element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+                        element.style.willChange = 'transform';
+                    });
+
+                    rafId = null;
+                    isAnimating = false;
+                });
+            };
+
+            window.addEventListener("mousemove", handleMouseMove, { passive: true });
+            
+            const handleResize = () => {
+                updateCache();
+            };
+            window.addEventListener('resize', handleResize, { passive: true });
+            
+            return () => {
+                window.removeEventListener("mousemove", handleMouseMove);
+                window.removeEventListener('resize', handleResize);
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            };
+        }, scopeRef);
+
+        return () => ctx.revert();
+    }, []);
+
+    // Main scroll-based animations
+    useEffect(() => {
+        if (!scopeRef.current || !wrapperRef.current) return;
+        
+        // ✅ Register plugin and configure INSIDE useEffect
+        gsap.registerPlugin(ScrollTrigger);
+        
+        ScrollTrigger.config({
+            autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+            ignoreMobileResize: true
+        });
+        
         const ctx = gsap.context(() => {
             let rafId = null;
             let currentX = 0;
